@@ -1,1 +1,5 @@
-# next_e_commerce_admin
+<<<<<<< HEAD
+Your changes in the file
+=======
+Changes from the remote repository
+>>>>>>> FETCH_HEAD
