@@ -30,12 +30,26 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
     const initializedClient = await client; // Await the resolved client Promise
     const db = initializedClient.db('test');
-    const products = await db.collection('products').find({}).toArray();
-    return new Response(JSON.stringify({ products }), { status: 200 });
+    let product;
+
+    if (id) {
+      product = await db.collection('products').findOne({ _id: new ObjectId(id) });
+      if (!product) {
+        return new Response(JSON.stringify({ error: "Product not found" }), { status: 404 });
+      }
+    } else {
+      const products = await db.collection('products').find({}).toArray();
+      product = products;
+    }
+
+    return new Response(JSON.stringify({ product }), { status: 200 });
   } catch (error) {
-    console.error("Error fetching products:", error);
-    return new Response(JSON.stringify({ error: "Failed to fetch products: " + error.message }), { status: 500 });
+    console.error("Error fetching product(s):", error);
+    return new Response(JSON.stringify({ error: "Failed to fetch product(s): " + error.message }), { status: 500 });
   }
 }

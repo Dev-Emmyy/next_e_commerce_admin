@@ -9,14 +9,16 @@ export default function Products() {
     const [products, setProducts] = useState([]);
     useEffect(() => {
     axios.get('/api/products')
-        .then(response => {
-            const productsArray = response.data.products; 
-            setProducts(productsArray);
-        })
-        .catch(error => {
-            console.error("Error fetching products:", error);
-        });
-    }, []);
+      .then(response => {
+        console.log(response.data); // Verify the structure of the response data
+        const productsArray = response.data.product || []; // Default to an empty array if undefined
+        setProducts(productsArray);
+      })
+      .catch(error => {
+        console.error("Error fetching products:", error);
+        setProducts([]); // Ensure products is always an array even if there's an error
+      });
+  }, []);
 
     return (
         <Layout>

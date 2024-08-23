@@ -11,6 +11,7 @@ const options = {
     strict: true,
     deprecationErrors: true,
   },
+  serverSelectionTimeoutMS: 30000 // Add this line
 };
 
 let clientPromise;
