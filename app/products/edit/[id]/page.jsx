@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 
 export default function EditProductPage({ params }) {
   const { id } = params;
-  const [product, setProduct] = useState(null);
+  const [products, setProducts] = useState([]);
 const [error, setError] = useState(null);
 const [loading, setLoading] = useState(true);
 
@@ -14,7 +14,7 @@ useEffect(() => {
     setLoading(true);
     axios.get(`/api/products/${id}`)
       .then(response => {
-        console.log(response.data.product);
+        setProducts(response.data.product);
         setLoading(false);
       })
       .catch(error => {
@@ -30,7 +30,9 @@ if (error) return <p>{error}</p>;
 // Render product details or other content
 return (
   <div>
-    {/* Render product details here */}
+    {products.map(product => (
+    <h1 key={product._id}>{product.name}</h1>
+    ))}
   </div>
 );
 }
