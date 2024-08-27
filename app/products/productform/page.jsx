@@ -14,9 +14,14 @@ export default function ProductForm({ _id,initialData }) {
     async function saveProducts(e){
         e.preventDefault();
         const data = {title, description, price};
-        await axios.post('/api/products', data);
-        setGoToProducts(true);
-    }
+        if (_id) {
+          await axios.put('/api/products', { ...data, id: _id });
+        } else {
+          await axios.post('/api/products', data);
+        }
+          setGoToProducts(true);
+        };
+        
     if (goToProducts) {
         router.push('/products');
         return null;
