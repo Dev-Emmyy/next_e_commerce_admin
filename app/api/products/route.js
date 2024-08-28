@@ -1,5 +1,4 @@
 
-
 import { NextResponse } from 'next/server';
 import clientPromise from '@/app/lib/db';
 import { ObjectId } from 'mongodb';
@@ -51,16 +50,15 @@ export async function PUT(request) {
   }
 }
 
-// Get Product(s) (GET)
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-
+    
     const client = await clientPromise;
-    const db = client.db();
-    let response;
+    const db = client.db('test'); // Make sure to use the correct database name
 
+    let response;
     if (id) {
       try {
         const product = await db.collection('products').findOne({ _id: new ObjectId(id) });
