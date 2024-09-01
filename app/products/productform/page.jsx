@@ -36,6 +36,12 @@ export default function ProductForm({ _id,initialData }) {
             value={title} 
             onChange={e => setTitle(e.target.value)} 
             />
+            <label>
+              Photos
+            </label>
+            <div>
+
+            </div>
             <label>Description</label>
             <textarea 
             placeholder="description" 
