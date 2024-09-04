@@ -28,9 +28,27 @@ export default function ProductForm({ _id,initialData }) {
         return null;
     };
 
-    function upLoadImages(ev){
+    async function upLoadImages(ev) {
       const files = ev.target?.files;
-    };
+      if (files.length > 0) {
+        const data = new FormData();
+        for (const file of files) {
+          data.append('file', file);
+        }
+        data.append('productId', _id); // Make sure _id is defined and correct
+        console.log('Sending productId:', _id); // Add this log
+        try {
+          const res = await axios.post('/api/upload', data);
+          if (res.data.success) {
+            setImages(prev => [...prev, ...res.data.files.map(file => file.path)]);
+          } else {
+            console.error('Upload failed:', res.data.error);
+          }
+        } catch (error) {
+          console.error('Upload error:', error.response?.data?.error || error.message);
+        }
+      }
+    }
 
     return (
           <form onSubmit={saveProducts}>
