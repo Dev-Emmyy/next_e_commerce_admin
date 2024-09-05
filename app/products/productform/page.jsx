@@ -63,6 +63,11 @@ export default function ProductForm({ _id,initialData }) {
               Photos
             </label>
             <div className="mb-2">
+              {images.map((imagePath, index) => (
+                <div key={index}>
+                  <img src={imagePath} alt={`Image ${index}`} className="w-24 h-24 object-cover" />
+                </div>
+              ))}
               <label className="w-24 h-24 flex items-center justify-center text-sm gap-1 gray-500 rounded-lg bg-gray-200 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
@@ -72,9 +77,6 @@ export default function ProductForm({ _id,initialData }) {
                 </div>
                 <input type="file" onChange={upLoadImages} className="hidden"/>
               </label>
-              {!images?.length && (
-                <div>No photos in this product</div>
-              )}
             </div>
             <label>Description</label>
             <textarea 
