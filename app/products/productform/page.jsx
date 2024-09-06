@@ -1,7 +1,9 @@
 'use client';
+import Spinner from "@/components/Spinner";
 import axios from "axios";
+import Image from "next/image";
 import { useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ProductForm({ _id,initialData }) {
     const [title, setTitle] = useState(initialData?.title || '');
@@ -9,12 +11,13 @@ export default function ProductForm({ _id,initialData }) {
     const [price, setPrice] = useState(initialData?.price || '');
     const [images, setImages] = useState(initialData?.images || []);
     const [goToProducts, setGoToProducts] = useState(false);
+    const [IsUploading, setIsUploading] = useState(false);;
     const router = useRouter();
     console.log({_id});
 
     async function saveProducts(e){
         e.preventDefault();
-        const data = {title, description, price};
+        const data = {title, description, price,images};
         if (_id) {
           await axios.put('/api/products', { ...data, id: _id });
         } else {
@@ -30,6 +33,7 @@ export default function ProductForm({ _id,initialData }) {
 
     async function upLoadImages(ev) {
       const files = ev.target?.files;
+      setIsUploading(true);
       if (files.length > 0) {
         const data = new FormData();
         for (const file of files) {
@@ -41,6 +45,7 @@ export default function ProductForm({ _id,initialData }) {
           const res = await axios.post('/api/upload', data);
           if (res.data.success) {
             setImages(prev => [...prev, ...res.data.files.map(file => file.path)]);
+            setIsUploading(false);
           } else {
             console.error('Upload failed:', res.data.error);
           }
@@ -62,12 +67,17 @@ export default function ProductForm({ _id,initialData }) {
             <label>
               Photos
             </label>
-            <div className="mb-2">
+            <div className="mb-2 flex flex-wrap gap-2">
               {images.map((imagePath, index) => (
-                <div key={index}>
-                  <img src={imagePath} alt={`Image ${index}`} className="w-24 h-24 object-cover" />
-                </div>
+                <div key={index} className="h-24">
+                  <Image src={imagePath} alt={`Image ${index}`} className="rounded-lg" width={100} height={500}/>
+                </div> 
               ))}
+              {IsUploading && (
+                <div className="h-24">
+                  <Spinner/>
+                </div>
+              )}
               <label className="w-24 h-24 flex items-center justify-center text-sm gap-1 gray-500 rounded-lg bg-gray-200 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
