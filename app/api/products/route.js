@@ -1,23 +1,21 @@
-
+import { Product } from '@/models/Product';
 import { NextResponse } from 'next/server';
 import clientPromise from '@/app/lib/db';
 import { ObjectId } from 'mongodb';
 
+
 // Create Product (POST)
 export async function POST(request) {
   try {
-    const client = await clientPromise;
-    const db = client.db();
-
+    await clientPromise;
     const formData = await request.json();
-    const result = await db.collection('products').insertOne(formData);
-
-    return NextResponse.json({ message: 'Product created successfully', id: result.insertedId }, { status: 201 });
+    const result = await Product.create(formData);
+    return NextResponse.json({ message: 'product created successfully', id: result._id }, { status: 201 });
   } catch (error) {
     console.error('Error creating product:', error);
     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
   }
-}
+};
 
 // Update Product (PUT)
 export async function PUT(request) {
@@ -48,7 +46,7 @@ export async function PUT(request) {
     console.error('Error updating product:', error);
     return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
   }
-}
+};
 
 export async function GET(request) {
   try {

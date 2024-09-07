@@ -7,5 +7,4 @@ const ProductSchema = new mongoose.Schema({
     images: {type: [String]}
 });
 
-// Check if the model already exists before creating a new one
 export const Product = mongoose.models.Product || mongoose.model('Product', ProductSchema);

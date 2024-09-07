@@ -1,9 +1,9 @@
 'use client';
 import Spinner from "@/components/Spinner";
 import axios from "axios";
-import Image from "next/image";
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { ReactSortable } from "react-sortablejs";
 
 export default function ProductForm({ _id,initialData }) {
     const [title, setTitle] = useState(initialData?.title || '');
@@ -32,28 +32,31 @@ export default function ProductForm({ _id,initialData }) {
     };
 
     async function upLoadImages(ev) {
-      const files = ev.target?.files;
-      setIsUploading(true);
-      if (files.length > 0) {
-        const data = new FormData();
-        for (const file of files) {
-          data.append('file', file);
+    const files = ev.target?.files;
+    setIsUploading(true);
+    if (files.length > 0) {
+      const data = new FormData();
+      for (const file of files) {
+        data.append('file', file);
+      }
+      try {
+        const res = await axios.post('/api/upload', data);
+        if (res.data.success) {
+          setImages(prev => [...prev, ...res.data.files.map(file => file.path)]);
+        } else {
+          console.error('Upload failed:', res.data.error);
         }
-        data.append('productId', _id); // Make sure _id is defined and correct
-        console.log('Sending productId:', _id); // Add this log
-        try {
-          const res = await axios.post('/api/upload', data);
-          if (res.data.success) {
-            setImages(prev => [...prev, ...res.data.files.map(file => file.path)]);
-            setIsUploading(false);
-          } else {
-            console.error('Upload failed:', res.data.error);
-          }
-        } catch (error) {
-          console.error('Upload error:', error.response?.data?.error || error.message);
-        }
+      } catch (error) {
+        console.error('Upload error:', error.response?.data?.error || error.message);
+      } finally {
+        setIsUploading(false);
       }
     }
+  };
+
+  function updateImagesOrder(images) {
+    setImages(images);
+  };
 
     return (
           <form onSubmit={saveProducts}>
@@ -68,13 +71,15 @@ export default function ProductForm({ _id,initialData }) {
               Photos
             </label>
             <div className="mb-2 flex flex-wrap gap-2">
-              {images.map((imagePath, index) => (
+              <ReactSortable list={images} setList={updateImagesOrder} className="flex flex-wrap">
+                {images.map((imagePath, index) => (
                 <div key={index} className="h-24">
-                  <Image src={imagePath} alt={`Image ${index}`} className="rounded-lg" width={100} height={500}/>
+                  <img src={imagePath} alt={`Image ${index}`} className="rounded-lg" />
                 </div> 
               ))}
+              </ReactSortable>
               {IsUploading && (
-                <div className="h-24">
+                <div className="h-24 flex items-center">
                   <Spinner/>
                 </div>
               )}
