@@ -2,17 +2,17 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/app/lib/db';
 import { ObjectId } from 'mongodb';
 
-// Create Category (POST)
+
 export async function POST(request) {
   try {
     const client = await clientPromise;
     const db = client.db('test');
 
-    const { name, parentCategories } = await request.json();
+    const { name, parentCategory } = await request.json();
     
     const newCategory = { 
       name, 
-      parentCategories: parentCategories ? new ObjectId(parentCategories) : null 
+      parentCategory: parentCategory || null 
     };
 
     const result = await db.collection('categories').insertOne(newCategory);
@@ -26,6 +26,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to create category' }, { status: 500 });
   }
 }
+
 
 export async function GET(request) {
   try {
