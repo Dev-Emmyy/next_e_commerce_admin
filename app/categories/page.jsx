@@ -26,39 +26,39 @@ export default function Categories() {
             });
     };
 
-    async function saveCategory(event) {
-        event.preventDefault();
-        try {
-            let response;
+   async function saveCategory(event) {
+    event.preventDefault();
+    try {
+        let response;
 
-            if (editCategory) {
-                response = await axios.put('/api/categories', { 
-                    name, 
-                    parentCategory: parentCategory || null 
-                });
-                console.log('Category edited:', response.data);
-            } else {
-                response = await axios.post('/api/categories', { 
-                    name, 
-                    parentCategory: parentCategory || null 
-                });
-                console.log('Category saved:', response.data);
-            }
-
-            setName(''); // Clear the name input
-            setParentCategory(''); // Clear the parentCategory input
-            fetchCategories(); // Refresh the categories list
-        } catch (error) {
-            console.error('Error saving category:', error);
-            setError('Failed to save category');
+        if (editedCategory) {
+            response = await axios.put(`/api/categories/${editedCategory._id}`, { 
+                name, 
+                parentCategory: parentCategory || null 
+            });
+            console.log('Category edited:', response.data);
+        } else {
+            response = await axios.post('/api/categories', { 
+                name, 
+                parentCategory: parentCategory || null 
+            });
+            console.log('Category saved:', response.data);
         }
-    ;}
 
+        setName(''); // Clear the name input
+        setParentCategory(''); // Clear the parentCategory input
+        setEditedCategory(null); // Clear the editedCategory state
+        fetchCategories(); // Refresh the categories list
+    } catch (error) {
+        console.error('Error saving category:', error);
+        setError('Failed to save category');
+        }
+    }
 
-    function editCategory(category){
+    function editCategory(category) {
         setEditedCategory(category);
         setName(category.name);
-        setParentCategory(category.parentCategory || '' );
+        setParentCategory(category.parentCategory?._id || '');
     }
 
     return (
