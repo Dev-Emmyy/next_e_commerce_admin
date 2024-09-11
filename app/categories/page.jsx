@@ -26,46 +26,61 @@ export default function Categories() {
             });
     };
 
-   async function saveCategory(event) {
-    event.preventDefault();
-    try {
-        let response;
+    async function saveCategory(event) {
+        event.preventDefault();
+        try {
+            let response;
 
-        if (editedCategory) {
-            response = await axios.put(`/api/categories/${editedCategory._id}`, { 
-                name, 
-                parentCategory: parentCategory || null 
-            });
-            console.log('Category edited:', response.data);
-        } else {
-            response = await axios.post('/api/categories', { 
-                name, 
-                parentCategory: parentCategory || null 
-            });
-            console.log('Category saved:', response.data);
-        }
+            if (editedCategory) {
+                response = await axios.put(`/api/categories/${editedCategory._id}`, { 
+                    name, 
+                    parentCategory: parentCategory || null 
+                });
+                console.log('Category edited:', response.data);
+            } else {
+                response = await axios.post('/api/categories', { 
+                    name, 
+                    parentCategory: parentCategory || null 
+                });
+                console.log('Category saved:', response.data);
+            }
 
-        setName(''); // Clear the name input
-        setParentCategory(''); // Clear the parentCategory input
-        setEditedCategory(null); // Clear the editedCategory state
-        fetchCategories(); // Refresh the categories list
-    } catch (error) {
-        console.error('Error saving category:', error);
-        setError('Failed to save category');
+            setName('');
+            setParentCategory('');
+            setEditedCategory(null);
+            fetchCategories();
+        } catch (error) {
+            console.error('Error saving category:', error);
+            setError('Failed to save category');
         }
     }
 
     function editCategory(category) {
         setEditedCategory(category);
         setName(category.name);
-        setParentCategory(category.parentCategory?._id || '');
+        setParentCategory(category.parentCategory || '');
+    }
+
+    // Helper function to get category name by ID
+    function getCategoryNameById(id) {
+        const category = categories.find(cat => cat._id === id);
+        return category ? category.name : 'Unknown';
+    }
+
+    // Helper function to check if a category can be a parent
+    function canBeParent(categoryId, currentId) {
+        if (!categoryId) return true;
+        if (categoryId === currentId) return false;
+        const category = categories.find(cat => cat._id === categoryId);
+        if (!category) return true;
+        return category.parentCategory !== currentId;
     }
 
     return (
         <Layout>
             <h1>Categories</h1>
             <label>
-                {editedCategory? `Edit category ${editedCategory.name}` : 'Create new category'}
+                {editedCategory ? `Edit category ${editedCategory.name}` : 'Create new category'}
             </label>
             <form onSubmit={saveCategory} className="flex gap-1">
                 <input 
@@ -82,9 +97,11 @@ export default function Categories() {
                 >
                     <option value="">No parent category</option>
                     {categories.map(category => (
-                        <option key={category._id} value={category.name}>
-                            {category.name}
-                        </option>
+                        canBeParent(category._id, editedCategory?._id) && (
+                            <option key={category._id} value={category._id}>
+                                {category.name}
+                            </option>
+                        )
                     ))}
                 </select>
                 <button type="submit" className="btn-primary py-1">Save</button>
@@ -101,10 +118,12 @@ export default function Categories() {
                     {categories.map(category => (
                         <tr key={category._id}>
                             <td>{category.name}</td>
-                            <td>{category.parentCategory || 'None'}</td>
+                            <td>{category.parentCategory ? getCategoryNameById(category.parentCategory) : 'None'}</td>
                             <td>
                                 <button 
-                                onClick={() => editCategory(category)} className="btn-primary mr-1">
+                                    onClick={() => editCategory(category)} 
+                                    className="btn-primary mr-1"
+                                >
                                     Edit
                                 </button>
                                 <button className="btn-primary">
@@ -116,5 +135,5 @@ export default function Categories() {
                 </tbody>
             </table>
         </Layout>
-    )
-};
+    );
+}
