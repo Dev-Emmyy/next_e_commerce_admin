@@ -2,8 +2,9 @@
 import Layout from "@/components/Layout";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { withSwal } from 'react-sweetalert2';
 
-export default function Categories() {
+function Categories() {
     const [editedCategory, setEditedCategory] = useState(null);
     const [name, setName] = useState('');
     const [categories, setCategories] = useState([]);
@@ -99,7 +100,7 @@ export default function Categories() {
                     {categories.map(category => (
                         canBeParent(category._id, editedCategory?._id) && (
                             <option key={category._id} value={category._id}>
-                                {category.name}
+                                 {category.name}
                             </option>
                         )
                     ))}
@@ -136,4 +137,9 @@ export default function Categories() {
             </table>
         </Layout>
     );
-}
+};
+
+
+export default withSwal(({ swal }, ref) => (
+    <Categories/>
+));
