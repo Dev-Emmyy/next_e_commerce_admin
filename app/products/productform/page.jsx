@@ -2,19 +2,24 @@
 import Spinner from "@/components/Spinner";
 import axios from "axios";
 import { useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
 
 export default function ProductForm({ _id,initialData }) {
     const [title, setTitle] = useState(initialData?.title || '');
     const [description, setDescription] = useState(initialData?.description || '');
+    const[category, setCategory] = useState('');
     const [price, setPrice] = useState(initialData?.price || '');
     const [images, setImages] = useState(initialData?.images || []);
     const [goToProducts, setGoToProducts] = useState(false);
-    const [IsUploading, setIsUploading] = useState(false);;
+    const [IsUploading, setIsUploading] = useState(false);
+    const [categories, setCategories] = useState([]);
     const router = useRouter();
-    console.log({_id});
-
+    useEffect(() => (
+      axios.get('/api/categories/').then(result => {
+        setCategories(result.data.categories);
+      })
+    ),[])
     async function saveProducts(e){
         e.preventDefault();
         const data = {title, description, price,images};
@@ -67,6 +72,14 @@ export default function ProductForm({ _id,initialData }) {
             value={title} 
             onChange={e => setTitle(e.target.value)} 
             />
+            <label>Category</label>
+            <select value={category} 
+            onChange={e => setCategory(e.target.value)}>
+              <option value="">Uncategorized</option>
+              {categories.length > 0 && categories.map(c => (
+                <option key={c._id} value={c._id}>{c.name}</option>
+              ))}
+            </select>
             <label>
               Photos
             </label>

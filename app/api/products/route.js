@@ -6,14 +6,35 @@ import { ObjectId } from 'mongodb';
 
 // Create Product (POST)
 export async function POST(request) {
+  console.log('Starting POST request to create product');
+  let client;
   try {
-    await clientPromise;
+    console.log('Attempting to connect to MongoDB');
+    client = await clientPromise;
+    console.log('MongoDB connection successful');
+
+    const db = client.db(); // Assuming your clientPromise connects to the right database
+    console.log('Database selected');
+
+    console.log('Parsing request body');
     const formData = await request.json();
-    const result = await Product.create(formData);
-    return NextResponse.json({ message: 'product created successfully', id: result._id }, { status: 201 });
+    console.log('Received form data:', formData);
+
+    console.log('Attempting to insert product');
+    const productsCollection = db.collection('products'); // Use the appropriate collection name
+    const result = await productsCollection.insertOne(formData);
+    console.log('Product inserted successfully:', result);
+
+    if (result.acknowledged && result.insertedId) {
+      return NextResponse.json({ message: 'Product created successfully', id: result.insertedId }, { status: 201 });
+    } else {
+      throw new Error('Product insertion was not acknowledged by the database');
+    }
   } catch (error) {
     console.error('Error creating product:', error);
-    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+    console.error('Error stack:', error.stack);
+    
+    return NextResponse.json({ error: 'Failed to create product', details: error.message }, { status: 500 });
   }
 };
 

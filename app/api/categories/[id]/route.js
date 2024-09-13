@@ -81,3 +81,28 @@ export async function PUT(request, { params }) {
         return NextResponse.json({ message: 'Server error', error: error.message }, { status: 500 });
     }
 }
+
+
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = params;
+
+    if (!id || !ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid or missing Product ID' }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('test');
+
+    const result = await db.collection('categories').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Product deleted successfully' }, { status: 200 });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return NextResponse.json({ error: 'Failed to delete product: ' + error.message }, { status: 500 });
+  }
+}

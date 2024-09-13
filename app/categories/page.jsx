@@ -4,7 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { withSwal } from 'react-sweetalert2';
 
-function Categories() {
+function Categories({swal}) {
     const [editedCategory, setEditedCategory] = useState(null);
     const [name, setName] = useState('');
     const [categories, setCategories] = useState([]);
@@ -12,19 +12,26 @@ function Categories() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchCategories();
+        let isMounted = true;
+        fetchCategories().then(() => {
+            if (isMounted) {
+                // State updates will only occur if the component is still mounted
+            }
+        });
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
-    function fetchCategories() {
-        axios.get('/api/categories')
-            .then(result => {
-                setCategories(result.data.categories);
-                console.log('Fetched categories:', result.data.categories);
-            })
-            .catch(err => {
-                console.error('Error fetching categories:', err);
-                setError('Failed to fetch categories');
-            });
+    async function fetchCategories() {
+        try {
+            const result = await axios.get('/api/categories');
+            setCategories(result.data.categories);
+            console.log('Fetched categories:', result.data.categories);
+        } catch (err) {
+            console.error('Error fetching categories:', err);
+            setError('Failed to fetch categories');
+        }
     };
 
     async function saveCategory(event) {
@@ -49,37 +56,63 @@ function Categories() {
             setName('');
             setParentCategory('');
             setEditedCategory(null);
-            fetchCategories();
+            await fetchCategories();
         } catch (error) {
             console.error('Error saving category:', error);
             setError('Failed to save category');
         }
-    }
+    };
 
     function editCategory(category) {
         setEditedCategory(category);
         setName(category.name);
         setParentCategory(category.parentCategory || '');
-    }
+    };
 
-    // Helper function to get category name by ID
     function getCategoryNameById(id) {
         const category = categories.find(cat => cat._id === id);
         return category ? category.name : 'Unknown';
-    }
+    };
 
-    // Helper function to check if a category can be a parent
     function canBeParent(categoryId, currentId) {
         if (!categoryId) return true;
         if (categoryId === currentId) return false;
         const category = categories.find(cat => cat._id === categoryId);
         if (!category) return true;
         return category.parentCategory !== currentId;
-    }
+    };
+
+    function deleteCategory(category){
+        try {
+            swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete ${category.name}`,
+                showCancelButton : true,
+                confirmButtonText: 'Yes, Delete!',
+                confirmButtonColor: '#d55',
+                cancelButtonText: 'Cancel',
+                reverseButtons : true,
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await axios.delete(`/api/categories/${category._id}`);
+                        console.log('Category deleted');
+                        await fetchCategories(); // Refresh the categories after deletion
+                    } catch (error) {
+                        console.error('Error deleting category:', error);
+                        setError('Failed to delete category');
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error with SweetAlert:', error);
+        }
+    };
 
     return (
         <Layout>
             <h1>Categories</h1>
+            {error && <p className="text-red-500">{error}</p>}
             <label>
                 {editedCategory ? `Edit category ${editedCategory.name}` : 'Create new category'}
             </label>
@@ -127,7 +160,9 @@ function Categories() {
                                 >
                                     Edit
                                 </button>
-                                <button className="btn-primary">
+                                <button
+                                    onClick={() => deleteCategory(category)}
+                                    className="btn-primary">
                                     Delete
                                 </button>
                             </td>
@@ -139,7 +174,6 @@ function Categories() {
     );
 };
 
-
 export default withSwal(({ swal }, ref) => (
-    <Categories/>
+    <Categories swal={swal}/>
 ));
