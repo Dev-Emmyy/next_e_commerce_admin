@@ -9,6 +9,7 @@ function Categories({swal}) {
     const [name, setName] = useState('');
     const [categories, setCategories] = useState([]);
     const [parentCategory, setParentCategory] = useState('');
+    const [properties, setProperties]  useState([]);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -109,6 +110,10 @@ function Categories({swal}) {
         }
     };
 
+    function addProperty() {
+
+    };
+
     return (
         <Layout>
             <h1>Categories</h1>
@@ -116,16 +121,15 @@ function Categories({swal}) {
             <label>
                 {editedCategory ? `Edit category ${editedCategory.name}` : 'Create new category'}
             </label>
-            <form onSubmit={saveCategory} className="flex gap-1">
-                <input 
+            <form onSubmit={saveCategory}>
+                <div className="flex gap-1">
+                     <input 
                     type="text" 
-                    placeholder="Category name" 
-                    className="mb-0"
+                    placeholder="Category name"
                     value={name}
                     onChange={e => setName(e.target.value)}
                 />
                 <select 
-                    className="mb-0" 
                     value={parentCategory} 
                     onChange={e => setParentCategory(e.target.value)}
                 >
@@ -138,7 +142,19 @@ function Categories({swal}) {
                         )
                     ))}
                 </select>
-                <button type="submit" className="btn-primary py-1">Save</button>
+                </div>
+                <div className="mb-2">
+                    <label className="block">Properties</label>
+                    <button 
+                    onClick={addProperty}
+                    type="button" 
+                    className="btn-default text-sm">
+                    Add new property
+                    </button>
+                </div>
+                <button type="submit" className="btn-primary py-1">
+                    Save
+                </button>
             </form>
             <table className="basic mt-4">
                 <thead>
