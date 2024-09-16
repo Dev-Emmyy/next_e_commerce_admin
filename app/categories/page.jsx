@@ -9,7 +9,7 @@ function Categories({swal}) {
     const [name, setName] = useState('');
     const [categories, setCategories] = useState([]);
     const [parentCategory, setParentCategory] = useState('');
-    const [properties, setProperties]  useState([]);
+    const [properties, setProperties] = useState([]);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -111,7 +111,9 @@ function Categories({swal}) {
     };
 
     function addProperty() {
-
+        setProperties(prev  => {
+            return [...prev, {name: '', values: ''}];
+        });
     };
 
     return (
@@ -151,6 +153,15 @@ function Categories({swal}) {
                     className="btn-default text-sm">
                     Add new property
                     </button>
+                    {properties.length > 0 && properties.map(property  => (
+                        <div className="flex gap-1" key='id'>
+                            <input type="text" 
+                                    value={property.name}
+                                    onChange={() => handlePropertyNameChange(property)} placeholder="property name (example: color)" />
+                            <input type="text" 
+                                    value={property.values} placeholder="values commas seperated" />
+                        </div>
+                    ))}
                 </div>
                 <button type="submit" className="btn-primary py-1">
                     Save
