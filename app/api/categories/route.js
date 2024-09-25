@@ -8,11 +8,12 @@ export async function POST(request) {
     const client = await clientPromise;
     const db = client.db('test');
 
-    const { name, parentCategory } = await request.json();
+    const { name, parentCategory, properties } = await request.json();
     
     const newCategory = { 
       name, 
-      parentCategory: parentCategory || null 
+      parentCategory: parentCategory || null,
+      properties : properties || []
     };
 
     const result = await db.collection('categories').insertOne(newCategory);
