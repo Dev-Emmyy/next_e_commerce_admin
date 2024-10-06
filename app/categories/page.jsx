@@ -202,7 +202,8 @@ function Categories({swal}) {
                     </button>
                 </div>  
             </form>
-            <table className="basic mt-4">
+            {editCategory && (
+                <table className="basic mt-4">
                 <thead>
                     <tr>
                         <td>Category name</td>
@@ -232,6 +233,7 @@ function Categories({swal}) {
                     ))}
                 </tbody>
             </table>
+            )}
         </Layout>
     );
 };
