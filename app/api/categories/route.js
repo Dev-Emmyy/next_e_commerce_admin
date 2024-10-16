@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/app/lib/db';
 import { ObjectId } from 'mongodb';
+import { getServerSession } from 'next-auth';
 
 
 export async function POST(request) {
+  
   try {
+    
     const client = await clientPromise;
     const db = client.db('test');
 
@@ -31,6 +34,12 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
+    const session = await getServerSession(); // Adjust this according to your auth setup
+    console.log(session);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     

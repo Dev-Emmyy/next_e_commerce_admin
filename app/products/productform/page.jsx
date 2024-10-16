@@ -9,6 +9,7 @@ export default function ProductForm({ _id, initialData }) {
     const [title, setTitle] = useState(initialData?.title || '');
     const [description, setDescription] = useState(initialData?.description || '');
     const [category, setCategory] = useState(initialData?.category || '');
+    const [productProperties, setProductProperties] = useState(initialData?.productProperties || '');
     const [price, setPrice] = useState(initialData?.price || '');
     const [images, setImages] = useState(initialData?.images || []);
     const [goToProducts, setGoToProducts] = useState(false);
@@ -31,7 +32,7 @@ export default function ProductForm({ _id, initialData }) {
 
     async function saveProducts(e) {
         e.preventDefault();
-        const data = { title, description, price, images, category };
+        const data = { title, description, price, images, category, productProperties };
         if (_id) {
             await axios.put('/api/products', { ...data, id: _id });
         } else {
@@ -66,6 +67,29 @@ export default function ProductForm({ _id, initialData }) {
 
     function updateImagesOrder(newImages) {
         setImages(newImages.map(img => img.path || img));
+    };
+
+    const propertiesToFill = [];
+    if (categories.length > 0 && category) {
+       let catInfo = categories.find(({_id}) => _id === category);
+       propertiesToFill.push(...catInfo.properties);
+       while(catInfo?.parent?._id) {
+        const parentCat = categories.find(({_id}) => _id === catInfo?.parent?._id);
+        propertiesToFill.push(...parentCat.properties);
+        catInfo = parentCat;
+       }
+    };
+
+    const parseValues = (valuesString) => {
+        return valuesString.split(',').map(value => value.trim()).filter(Boolean);
+    };
+
+    function setProductProp(propName,value) {
+        setProductProperties(prev=> {
+            const newProductsProps = {...prev};
+            newProductsProps[propName] = value;
+            return newProductsProps;
+        });
     }
 
     return (
@@ -87,6 +111,24 @@ export default function ProductForm({ _id, initialData }) {
                     <option key={c._id} value={c._id}>{c.name}</option>
                 ))}
             </select>
+            {propertiesToFill.length > 0 && propertiesToFill.map((p, index) => (
+                <div key={index} className="flex gap-1">
+                    <div>{p.name}</div>
+                    <select 
+                        value={productProperties[p.name]}
+                        onChange={(e) => setProductProp(p.name,e.target.value)}>
+                        <option value="">Select a value</option>
+                        {Array.isArray(p.values) 
+                            ? p.values.map((v, vIndex) => (
+                                <option key={vIndex} value={v}>{v}</option>
+                              ))
+                            : parseValues(p.values || '').map((v, vIndex) => (
+                                <option key={vIndex} value={v}>{v}</option>
+                              ))
+                        }
+                    </select>
+                </div>
+            ))}
             <label>Photos</label>
             <div className="mb-2 flex flex-wrap gap-2">
                 <ReactSortable 

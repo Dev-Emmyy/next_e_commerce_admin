@@ -202,7 +202,7 @@ function Categories({swal}) {
                     </button>
                 </div>  
             </form>
-            {editCategory && (
+            {!editedCategory && (
                 <table className="basic mt-4">
                 <thead>
                     <tr>
@@ -215,7 +215,7 @@ function Categories({swal}) {
                     {categories.map(category => (
                         <tr key={category._id}>
                             <td>{category.name}</td>
-                            <td>{category.parentCategory ? getCategoryNameById(category.parentCategory) : 'None'}</td>
+                            <td>{category.parentCategory ? getCategoryNameById(category.parentCategory) : ''}</td>
                             <td>
                                 <button 
                                     onClick={() => editCategory(category)} 
